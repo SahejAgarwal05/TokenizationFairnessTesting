@@ -193,15 +193,16 @@ class LlamaPrunedModel(nn.Module):
 
     def forward(self, input_ids):
         pruned_tokens_ids, position_ids = self.token_pruner(input_ids.to("cuda:0"))
-        pruned_tokens = self.tokenizer.decode(pruned_tokens_ids, skip_special_tokens=True)['generated_text']
+        import pdb;pdb.set_trace()
+        pruned_tokens = self.tokenizer.decode(pruned_tokens_ids, skip_special_tokens=True)
         # output = self.main_model.generate(
         #     input_ids=pruned_tokens,
         #     position_ids=position_ids,
         #     max_new_tokens=1,
         #     do_sample=False,
         # )
-        output = self.main_model_pipeline(pruned_tokens)
-        return output[-1]
+        output = self.main_model_pipeline(pruned_tokens)["generated_text"]
+        return output
 
 
 def main():
