@@ -1,5 +1,6 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "3,6"
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "5,6"
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,6 +10,7 @@ import tqdm
 from torch.profiler import profile, record_function, ProfilerActivity
 import simplejson as json
 from accelerate import Accelerator, dispatch_model, infer_auto_device_map
+from transformers import pipeline
 
 # import bitsandbytes as bnb
 from transformers import BitsAndBytesConfig
@@ -86,7 +88,7 @@ class LlamaAttentionWeightsOnly(nn.Module):
 # TokenPruner Module
 # ===============================
 class TokenPruner(nn.Module):
-    def __init__(self, small_model_id, compression_ratio):
+    def __init__(self, small_model_id, compression_ratio, device="cuda:0"):
         super().__init__()
         # Load the small model
         small_model = AutoModelForCausalLM.from_pretrained(
@@ -95,8 +97,7 @@ class TokenPruner(nn.Module):
             token=token,
             attn_implementation="flash_attention_2",
             torch_dtype=torch.bfloat16,
-            device_map="auto",
-        )
+        ).to(device)
         self.embeddings = small_model.get_input_embeddings()
         self.rotary_embeddings = small_model.model.rotary_emb
 
@@ -163,8 +164,25 @@ class LlamaPrunedModel(nn.Module):
             token=token,
             # quantization_config=bnb_config
         )
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            main_model_id,
+            trust_remote_code=True,
+            token=token,
+        )
+        self.main_model_pipeline = pipeline(
+            "text-generation",
+            model=self.main_model,
+            tokenizer=self.tokenizer,
+            torch_dtype=torch.bfloat16,  # force fp16 mode
+            device_map="auto",
+            return_full_text=False,
+            use_cache=True,
+            max_new_tokens=1,
+        )
         self.embeddings = self.main_model.get_input_embeddings()
-        self.token_pruner = TokenPruner(small_model_id, compression_ratio)
+        self.token_pruner = TokenPruner(
+            small_model_id, compression_ratio, device="cuda:0"
+        )
 
         # Freeze main model
         for param in self.main_model.parameters():
@@ -172,13 +190,15 @@ class LlamaPrunedModel(nn.Module):
         self.embeddings.requires_grad = False
 
     def forward(self, input_ids):
-        pruned_tokens, position_ids = self.token_pruner(input_ids)
-        output = self.main_model.generate(
-            input_ids=pruned_tokens,
-            position_ids=position_ids,
-            max_new_tokens=1,
-            do_sample=False,
-        )
+        pruned_tokens_ids, position_ids = self.token_pruner(input_ids.to("cuda:0"))
+        pruned_tokens = self.tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=True)[0]['generated_text']
+        # output = self.main_model.generate(
+        #     input_ids=pruned_tokens,
+        #     position_ids=position_ids,
+        #     max_new_tokens=1,
+        #     do_sample=False,
+        # )
+        output = self.main_model_pipeline(pruned_tokens)
         return output[-1]
 
 
@@ -252,7 +272,7 @@ def main():
         with torch.no_grad():
             for sample in tqdm.tqdm(dataset, desc=f"Processing {lang}"):
                 input_ids = torch.tensor([sample["input_ids"]], dtype=torch.long).to(
-                    accelerator.device
+                    model.main_model.device
                 )
 
                 if accelerator.is_main_process:
@@ -265,8 +285,8 @@ def main():
                     ) as prof:
                         output = model(input_ids)
 
-                    pred_token = tokenizer.decode(output).strip()
-                    sample["output"] = pred_token
+                    # pred_token = tokenizer.decode(output).strip()
+                    sample["output"] = output
 
                     # Compare predicted token with target token (example logic)
                     target_token = tokenizer.decode(
@@ -286,7 +306,7 @@ def main():
 
                     local_data.append(sample)
 
-                torch.cuda.empty_cache()
+                # torch.cuda.empty_cache()
 
         # ---------------------------------------------------------------------
         # Store each process's local_data in a JSON Lines file, appending lines.
