@@ -126,7 +126,10 @@ class TokenPruner(nn.Module):
         )
 
         # Average over heads and query dimension => token importance
-        importance_scores = attention_weights.mean(dim=1).mean(dim=1)
+        #################################DIFF###########################################
+        # importance_scores = attention_weights.mean(dim=1).mean(dim=1) # [1, seq_len]
+        importance_scores = attention_weights.mean(dim=1).mean(dim=1)[0] # [seq_len]
+        #################################DIFF###########################################
 
         # Number of tokens to keep
         compressed_length = int(seq_len * self.compression_ratio)
@@ -135,11 +138,12 @@ class TokenPruner(nn.Module):
         # Top-k token indices
         _, topk_ids = torch.topk(
             importance_scores, compressed_length, dim=1, sorted=False
-        )
+        ) # [seq_len]
         # Sort to preserve order
-        topk_ids = torch.sort(topk_ids, dim=1)[0]
+        # topk_ids = torch.sort(topk_ids, dim=1)[0] # [1, seq_len]
+        topk_ids = torch.sort(topk_ids)[0] # [seq_len]
 
-        if topk_ids[-1][-1] != seq_len - 1:
+        if topk_ids[-1] != seq_len - 1:
             topk_ids = torch.cat(
                 (topk_ids, torch.tensor([seq_len - 1], device=topk_ids.device)), dim=1
             )
@@ -191,7 +195,7 @@ class LlamaPrunedModel(nn.Module):
 
     def forward(self, input_ids):
         pruned_tokens_ids, position_ids = self.token_pruner(input_ids.to("cuda:0"))
-        pruned_tokens = self.tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=True)[0]['generated_text']
+        pruned_tokens = self.tokenizer.decode(pruned_tokens_ids, skip_special_tokens=True)['generated_text']
         # output = self.main_model.generate(
         #     input_ids=pruned_tokens,
         #     position_ids=position_ids,
