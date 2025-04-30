@@ -148,7 +148,7 @@ class TokenPruner(nn.Module):
             )
 
         # Gather pruned tokens
-        pruned_tokens = input_ids.gather(1, topk_ids)
+        pruned_tokens = input_ids[0].gather(0, topk_ids)
         return pruned_tokens, topk_ids
 
 
