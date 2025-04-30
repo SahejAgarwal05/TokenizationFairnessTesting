@@ -1,6 +1,6 @@
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "5,6"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"#change when needed
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -95,7 +95,6 @@ class TokenPruner(nn.Module):
             small_model_id,
             trust_remote_code=True,
             token=token,
-            attn_implementation="flash_attention_2",
             torch_dtype=torch.bfloat16,
         ).to(device)
         self.embeddings = small_model.get_input_embeddings()
@@ -157,7 +156,6 @@ class LlamaPrunedModel(nn.Module):
         super().__init__()
         self.main_model = AutoModelForCausalLM.from_pretrained(
             main_model_id,
-            attn_implementation="flash_attention_2",
             torch_dtype=torch.bfloat16,
             device_map="auto",
             trust_remote_code=True,
@@ -191,7 +189,7 @@ class LlamaPrunedModel(nn.Module):
 
     def forward(self, input_ids):
         pruned_tokens_ids, position_ids = self.token_pruner(input_ids.to("cuda:0"))
-        pruned_tokens = self.tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=True)[0]['generated_text']
+        pruned_tokens = self.tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False)[0]
         # output = self.main_model.generate(
         #     input_ids=pruned_tokens,
         #     position_ids=position_ids,
@@ -237,12 +235,6 @@ def main():
             "meta-llama/Llama-3.2-1B-Instruct-evals", ds_config_name, token=token
         )["latest"]
 
-        # Shard dataset if multi-process
-        if accelerator.num_processes > 1:
-            dataset = dataset.shard(
-                num_shards=accelerator.num_processes, index=accelerator.process_index
-            )
-
         # Preprocessing
         def mapping(example):
             outputs = tokenizer(example["input_final_prompts"])
@@ -275,38 +267,29 @@ def main():
                     model.main_model.device
                 )
 
-                if accelerator.is_main_process:
                     # Profile on main process only
-                    with profile(
-                        activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
-                        record_shapes=True,
-                        with_flops=True,
-                        profile_memory=True,
-                    ) as prof:
-                        output = model(input_ids)
-
-                    # pred_token = tokenizer.decode(output).strip()
-                    sample["output"] = output
-
-                    # Compare predicted token with target token (example logic)
-                    target_token = tokenizer.decode(
-                        tokenizer.encode(sample["input_correct_responses"][0])[-1]
-                    ).strip()
-
-                    current_flops = prof.key_averages().total_average().flops
-                    total_flops += current_flops
-                    sample["flops"] = current_flops
-
-                    local_data.append(sample)
-                else:
-                    # Non-main processes won't profile, but still produce results
+                with profile(
+                    activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+                    record_shapes=True,
+                    with_flops=True,
+                    profile_memory=True,
+                ) as prof:
                     output = model(input_ids)
-                    pred_token = tokenizer.decode(output).strip()
-                    sample["output"] = pred_token
 
-                    local_data.append(sample)
+                # pred_token = tokenizer.decode(output).strip()
+                sample["output"] = output
 
-                # torch.cuda.empty_cache()
+                # Compare predicted token with target token (example logic)
+                target_token = tokenizer.decode(
+                    tokenizer.encode(sample["input_correct_responses"][0])[-1]
+                ).strip()
+
+                current_flops = prof.key_averages().total_average().flops
+                total_flops += current_flops
+                sample["flops"] = current_flops
+
+                local_data.append(sample)
+                torch.cuda.empty_cache()
 
         # ---------------------------------------------------------------------
         # Store each process's local_data in a JSON Lines file, appending lines.
