@@ -1,6 +1,6 @@
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3,4"#change when needed
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"#change when needed
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -144,7 +144,7 @@ class TokenPruner(nn.Module):
 
         if topk_ids[-1] != seq_len - 1:
             topk_ids = torch.cat(
-                (topk_ids, torch.tensor([seq_len - 1], device=topk_ids.device)), dim=1
+                (topk_ids, torch.tensor([seq_len - 1], device=topk_ids.device)), dim=0
             )
 
         # Gather pruned tokens
@@ -193,7 +193,6 @@ class LlamaPrunedModel(nn.Module):
 
     def forward(self, input_ids):
         pruned_tokens_ids, position_ids = self.token_pruner(input_ids.to("cuda:0"))
-        import pdb;pdb.set_trace()
         pruned_tokens = self.tokenizer.decode(pruned_tokens_ids, skip_special_tokens=True)
         # output = self.main_model.generate(
         #     input_ids=pruned_tokens,
@@ -201,7 +200,7 @@ class LlamaPrunedModel(nn.Module):
         #     max_new_tokens=1,
         #     do_sample=False,
         # )
-        output = self.main_model_pipeline(pruned_tokens)["generated_text"]
+        output = self.main_model_pipeline(pruned_tokens)[0]["generated_text"]
         return output
 
 
@@ -209,7 +208,8 @@ def main():
     accelerator = Accelerator()
 
     small_model_id = "meta-llama/Llama-3.2-1B-Instruct"
-    main_model_id = "meta-llama/Llama-3.1-70B-Instruct"
+    #main_model_id = "meta-llama/Llama-3.1-70B-Instruct"
+    main_model_id = "meta-llama/Llama-3.1-8B-Instruct"
     compression_ratio = 0.9
 
     tokenizer = AutoTokenizer.from_pretrained(main_model_id, token=token)
