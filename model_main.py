@@ -142,7 +142,7 @@ class TokenPruner(nn.Module):
 
         if topk_ids[-1][-1] != seq_len - 1:
             topk_ids = torch.cat(
-                (topk_ids, torch.tensor([[seq_len - 1]].long(), device=topk_ids.device)), dim=1
+                (topk_ids, torch.tensor([[seq_len - 1]], device=topk_ids.device).long()), dim=1
             )
 
         # Gather pruned tokens
@@ -172,16 +172,6 @@ class LlamaPrunedModel(nn.Module):
         self.config = AutoConfig.from_pretrained(main_model_id)
         self.device = self.main_model.device
         self.tie_weights = lambda: self
-        # self.main_model_pipeline = pipeline(
-        #     "text-generation",
-        #     model=self.main_model,
-        #     tokenizer=self.tokenizer,
-        #     torch_dtype=torch.bfloat16,  # force fp16 mode
-        #     device_map="auto",
-        #     return_full_text=False,
-        #     use_cache=True,
-        #     max_new_tokens=1,
-        # )
         self.embeddings = self.main_model.get_input_embeddings()
         self.token_pruner = TokenPruner(
             small_model_id, compression_ratio, device="cuda:0"

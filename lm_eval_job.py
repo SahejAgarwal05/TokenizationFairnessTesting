@@ -1,5 +1,6 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 import lm_eval
 from lm_eval.utils import setup_logging
 from lm_eval.loggers import WandbLogger
@@ -21,10 +22,11 @@ task_manager = lm_eval.tasks.TaskManager()
 setup_logging("DEBUG") # optional, but recommended; or you can set up logging yourself
 results = lm_eval.simple_evaluate( # call simple_evaluate
     model=HFLM(pretrained=model, tokenizer=model.tokenizer),
-    tasks=["mgsm_cot_native"],
+    # tasks=["mgsm_cot_native_bn"],
+    tasks=["mmlu"],
     num_fewshot=5,
     log_samples=True,
-    batch_size=16,
+    # batch_size=16,
     # task_manager=task_manager,
 )
 
