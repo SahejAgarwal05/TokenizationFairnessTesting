@@ -14,14 +14,14 @@ small_model_id = "meta-llama/Llama-3.2-1B-Instruct"
 main_model_id = "meta-llama/Llama-3.1-8B-Instruct"
 compression_ratio = 0.9
 
-tokenizer = AutoTokenizer.from_pretrained(main_model_id,token)
+tokenizer = AutoTokenizer.from_pretrained(main_model_id)
 
 model = LlamaPrunedModel(main_model_id, small_model_id, compression_ratio,token=token)
 # initialize logging
 task_manager = lm_eval.tasks.TaskManager()
 setup_logging("DEBUG") # optional, but recommended; or you can set up logging yourself
 results = lm_eval.simple_evaluate( # call simple_evaluate
-    model=HFLM(pretrained=model, tokenizer=model.tokenizer),
+    model=HFLM(pretrained=model, tokenizer=tokenizer),
     tasks=["mgsm_cot_native"],
     #tasks=["mmlu"],
     #num_fewshot=5,
