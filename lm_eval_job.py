@@ -21,9 +21,10 @@ task_manager = lm_eval.tasks.TaskManager()
 setup_logging("DEBUG") # optional, but recommended; or you can set up logging yourself
 results = lm_eval.simple_evaluate( # call simple_evaluate
     model=HFLM(pretrained=model, tokenizer=model.tokenizer),
-    tasks=["mgsm"],
+    tasks=["mgsm_cot_native"],
     num_fewshot=5,
     log_samples=True,
+    batch_size=16,
     # task_manager=task_manager,
 )
 
