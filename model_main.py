@@ -164,8 +164,13 @@ class LlamaPrunedModel(nn.Module):
             token=token,
             # quantization_config=bnb_config
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(
+        self.main_tokenizer = AutoTokenizer.from_pretrained(
             main_model_id,
+            trust_remote_code=True,
+            token=token,
+        )
+        self.prunner_tokenizer = AutoTokenizer.from_pretrained(
+            small_model_id,
             trust_remote_code=True,
             token=token,
         )
@@ -183,15 +188,15 @@ class LlamaPrunedModel(nn.Module):
         self.embeddings.requires_grad = False
     def post_tokenizer(self, input_ids,atention_mask=None):
         pruned_tokens_ids,_ = self.token_pruner(input_ids.to("cuda:0"),atention_mask)
-        pruned_tokens = self.tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=True)
+        pruned_tokens = self.prunner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=True)
         return pruned_tokens
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         pruned_tokens = self.post_tokenizer(input_ids, attention_mask)
-        output = self.main_model.forward(**self.tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
+        output = self.main_model.forward(**self.main_tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
         return output
     def generate(self, input_ids=None, attention_mask=None, **kwargs):
         pruned_tokens = self.post_tokenizer(input_ids, attention_mask)
-        output = self.main_model.generate(**self.tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
+        output = self.main_model.generate(**self.main_tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
         return output
 
 
