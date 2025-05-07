@@ -26,12 +26,12 @@ results = lm_eval.simple_evaluate( # call simple_evaluate
     model=HFLM(pretrained=model, tokenizer=tokenizer),
     tasks=["mmlu_it_llama","mmlu_fr_llama","mmlu_pt_llama","mmlu_th_llama","mmlu_hi_llama","mmlu_de_llama","mmlu_es_llama"],
     #tasks=["mmlu"],
-    #num_fewshot=5,
+    num_fewshot=5,
     log_samples=True,
     # batch_size=16,
     task_manager=task_manager,
     apply_chat_template=True,
-    fewshot_as_multiturn=True
+    fewshot_as_multiturn=True,
 )
 
 wandb_logger = WandbLogger()
