@@ -1,4 +1,5 @@
 import os
+
 # os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 import lm_eval
@@ -14,18 +15,35 @@ token = "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"
 
 small_model_id = "meta-llama/Llama-3.2-1B-Instruct"
 main_model_id = "meta-llama/Llama-3.1-8B-Instruct"
-compression_ratio = 0.9
+compression_ratio = 0.8
 
 tokenizer = AutoTokenizer.from_pretrained(main_model_id)
 
-model = LlamaPrunedModel(main_model_id, small_model_id, compression_ratio,token=token)
+model = LlamaPrunedModel(main_model_id, small_model_id, compression_ratio, token=token)
 # initialize logging
 task_manager = TaskManager()
-setup_logging("DEBUG") # optional, but recommended; or you can set up logging yourself
-results = lm_eval.simple_evaluate( # call simple_evaluate
+setup_logging("DEBUG")  # optional, but recommended; or you can set up logging yourself
+results = lm_eval.simple_evaluate(  # call simple_evaluate
     model=HFLM(pretrained=model, tokenizer=tokenizer),
-    tasks=["mmlu_it_llama","mmlu_fr_llama","mmlu_pt_llama","mmlu_th_llama","mmlu_hi_llama","mmlu_de_llama","mmlu_es_llama"],
-    #tasks=["mmlu"],
+    # tasks=["mmlu_it_llama","mmlu_fr_llama","mmlu_pt_llama","mmlu_th_llama","mmlu_hi_llama","mmlu_de_llama","mmlu_es_llama"],
+    # tasks=["mmlu"],
+    tasks=[
+        "global_mmlu_ar",
+        "global_mmlu_de",
+        "global_mmlu_en",
+        "global_mmlu_es",
+        "global_mmlu_fr",
+        "global_mmlu_hi",
+        "global_mmlu_id",
+        "global_mmlu_it",
+        "global_mmlu_ja",
+        "global_mmlu_ko",
+        "global_mmlu_pl",
+        "global_mmlu_pt",
+        "global_mmlu_ro",
+        "global_mmlu_ru",
+        "global_mmlu_th",
+    ],  #global_mmlu_lite
     num_fewshot=5,
     log_samples=True,
     # batch_size=16,
