@@ -30,7 +30,8 @@ results = lm_eval.simple_evaluate( # call simple_evaluate
     log_samples=True,
     # batch_size=16,
     task_manager=task_manager,
-    apply_chat_template=True
+    apply_chat_template=True,
+    fewshot_as_multiturn=True
 )
 
 wandb_logger = WandbLogger()
