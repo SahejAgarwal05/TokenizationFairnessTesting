@@ -162,7 +162,6 @@ class GemmaPrunedModel(nn.Module):
             pruned_ids = pruned_ids[:, 1:]
         return self.pruner_tokenizer.batch_decode(pruned_ids, skip_special_tokens=False)
 
-    # -------- forward / generate wrappers --------
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         if self.compression_ratio == 1.0:
             return self.main_model(input_ids, attention_mask=attention_mask, **kwargs)
