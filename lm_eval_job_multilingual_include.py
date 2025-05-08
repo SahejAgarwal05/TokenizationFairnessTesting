@@ -89,7 +89,7 @@ results = lm_eval.simple_evaluate(  # call simple_evaluate
         "include_base_44_telugu",
         "include_base_44_turkish",
         "include_base_44_ukrainian",
-        "include_base_44_urdu",
+        # "include_base_44_urdu",
         "include_base_44_uzbek",
         "include_base_44_vietnamese",
     ],  # Albanian, Arabic, Armenian, Azerbaijani, Basque, Belarusian, Bengali, Bulgarian, Chinese, Croatian, Dutch, Estonian, Finnish, French, Georgian, German, Greek, Hebrew, Hindi, Hungarian, Indonesia, Italian, Japanese, Kazakh, Korean, Lithuanian, Malay, Malayalam, Nepali, North Macedonian, Persian, Polish, Portuguese, russian, Serbian, Spanish, Tagalog, Tamil, Telugu, Turkish, Ukrainian, Urdu, Uzbek, Vietnamese
