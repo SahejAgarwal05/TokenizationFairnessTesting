@@ -50,7 +50,7 @@ results = lm_eval.simple_evaluate(  # call simple_evaluate
     tasks=[
         "include_base_44_albanian",
         "include_base_44_arabic",
-        "include_base_44_armenia",
+        "include_base_44_armenian",
         "include_base_44_azerbaijani",
         "include_base_44_basque",
         "include_base_44_belarusian",
