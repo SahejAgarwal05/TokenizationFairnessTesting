@@ -7,8 +7,6 @@ from transformers import (
     AutoConfig,
     BitsAndBytesConfig,
 )
-import os 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1,3"
 from TokeniserMap import TokenizerMap
 HF_TOKEN = "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"
 SMALL_MODEL_ID = "meta-llama/Llama-3.2-1B-Instruct"   # pruner
