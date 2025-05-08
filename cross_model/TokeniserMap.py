@@ -19,3 +19,4 @@ class TokenizerMap():
                 string = string.replace(i, self.map_dict[i])
                 print(string)
         return string
+

@@ -169,5 +169,3 @@ class CrossPrunerModel(nn.Module):
         pruned_tokens= self.post_tokenizer(input_ids, attention_mask)
         output = self.main_model.generate(**self.main_tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
         return output
-
-

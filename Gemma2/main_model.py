@@ -158,10 +158,7 @@ class GemmaPrunedModel(nn.Module):
                                           attention_mask)
         pruned_tokens_ids = pruned_tokens_ids.tolist()
         bos_id = self.pruner_tokenizer.bos_token_id
-        for i in range(len(pruned_tokens_ids)):
-            if pruned_tokens_ids[i][0] == bos_id:
-                pruned_tokens_ids[i] = pruned_tokens_ids[i][1:]
-        return self.pruner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False)
+        return self.pruner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False, add_special_tokens=False)
 
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         if self.compression_ratio == 1.0:
