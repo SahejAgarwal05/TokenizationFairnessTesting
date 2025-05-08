@@ -8,6 +8,7 @@ from transformers import AutoTokenizer
 from model_main import LlamaPrunedModel
 from lm_eval.tasks import TaskManager
 from lm_eval.models.huggingface import HFLM
+from Gemma2.main_model import GemmaPrunedModel
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -35,7 +36,10 @@ compression_ratio = args.compression_ratio
 
 tokenizer = AutoTokenizer.from_pretrained(main_model_id)
 
-model = LlamaPrunedModel(main_model_id, small_model_id, compression_ratio, token=token)
+if "Gemma" in main_model_id:
+    model = GemmaPrunedModel(main_model_id, small_model_id, compression_ratio)
+else:
+    model = LlamaPrunedModel(main_model_id, small_model_id, compression_ratio,token=token)
 # initialize logging
 task_manager = TaskManager()
 setup_logging("DEBUG")  # optional, but recommended; or you can set up logging yourself
