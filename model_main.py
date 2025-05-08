@@ -160,7 +160,7 @@ class LlamaPrunedModel(nn.Module):
             trust_remote_code=True,
             token=token,
         )
-        self.prunner_tokenizer = AutoTokenizer.from_pretrained(
+        self.pruner_tokenizer = AutoTokenizer.from_pretrained(
             small_model_id,
             trust_remote_code=True,
             token=token,
@@ -185,11 +185,11 @@ class LlamaPrunedModel(nn.Module):
         if self.compression_ratio == 1.0:
             return self.main_model.forward(input_ids,attention_mask=attention_mask, **kwargs)
         pruned_tokens = self.post_tokenizer(input_ids, attention_mask)
-        output = self.main_model.forward(**self.main_tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
+        output = self.main_model.forward(**self.main_tokenizer(pruned_tokens,return_tensors="pt",add_special_tokens=False).to(self.device), **kwargs)
         return output
     def generate(self, input_ids=None, attention_mask=None, **kwargs):
         if self.compression_ratio == 1.0:
             return self.main_model.forward(input_ids,attention_mask=attention_mask, **kwargs)
         pruned_tokens= self.post_tokenizer(input_ids, attention_mask)
-        output = self.main_model.generate(**self.main_tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
+        output = self.main_model.generate(**self.main_tokenizer(pruned_tokens,return_tensors="pt",add_special_tokens=False).to(self.device), **kwargs)
         return output
