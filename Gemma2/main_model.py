@@ -154,13 +154,14 @@ class GemmaPrunedModel(nn.Module):
 
     # helper: run the pruner, then detokenize on the *pruner* vocab
     def _prune_and_detok(self, input_ids, attention_mask=None):
-        pruned_ids, _ = self.token_pruner(input_ids.to(next(self.token_pruner.parameters()).device),
+        pruned_tokens_ids, _ = self.token_pruner(input_ids.to(next(self.token_pruner.parameters()).device),
                                           attention_mask)
-        # drop leading BOS if present (Gemma 2-BOS style)
+        pruned_tokens_ids = pruned_tokens_ids.tolist()
         bos_id = self.pruner_tokenizer.bos_token_id
-        if (pruned_ids[:, 0] == bos_id).any():
-            pruned_ids = pruned_ids[:, 1:]
-        return self.pruner_tokenizer.batch_decode(pruned_ids, skip_special_tokens=False)
+        for i in range(len(pruned_tokens_ids)):
+            if pruned_tokens_ids[i][0] == bos_id:
+                pruned_tokens_ids[i] = pruned_tokens_ids[i][1:]
+        return self.pruner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False)
 
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         if self.compression_ratio == 1.0:
