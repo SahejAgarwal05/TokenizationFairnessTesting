@@ -1,6 +1,6 @@
 import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import lm_eval
 from lm_eval.utils import setup_logging
 from lm_eval.loggers import WandbLogger

@@ -45,7 +45,7 @@ results = lm_eval.simple_evaluate( # call simple_evaluate
     model=HFLM(pretrained=model, tokenizer=tokenizer),
     tasks=["mgsm_cot_native"],
     #tasks=["mmlu"],
-    # num_fewshot=5,
+    num_fewshot=5,
     log_samples=True,
     # batch_size=16,
     task_manager=task_manager,
