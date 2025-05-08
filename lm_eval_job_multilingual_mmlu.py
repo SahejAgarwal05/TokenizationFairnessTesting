@@ -1,5 +1,4 @@
 import os
-
 # os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 import lm_eval
@@ -8,14 +7,31 @@ from lm_eval.loggers import WandbLogger
 from transformers import AutoTokenizer
 from model_main import LlamaPrunedModel
 from lm_eval.tasks import TaskManager
-import torch
 from lm_eval.models.huggingface import HFLM
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--small_model",
+    default="meta-llama/Llama-3.2-1B-Instruct",
+    type=str,
+)
+parser.add_argument(
+    "--main_model",
+    default="meta-llama/Llama-3.1-8B-Instruct",
+    type=str,
+)
+parser.add_argument(
+    "--compression_ratio",
+    default=0.9,
+    type=float,
+)
+args = parser.parse_args()
 
 token = "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"
 
-small_model_id = "meta-llama/Llama-3.2-1B-Instruct"
-main_model_id = "meta-llama/Llama-3.1-8B-Instruct"
-compression_ratio = 0.8
+small_model_id = args.small_model
+main_model_id = args.main_model
+compression_ratio = args.compression_ratio
 
 tokenizer = AutoTokenizer.from_pretrained(main_model_id)
 
@@ -44,6 +60,7 @@ results = lm_eval.simple_evaluate(  # call simple_evaluate
         "global_mmlu_yo",
         "global_mmlu_zh",
     ],  #global_mmlu_lite
+
     num_fewshot=5,
     log_samples=True,
     # batch_size=16,
@@ -56,3 +73,4 @@ wandb_logger = WandbLogger()
 wandb_logger.post_init(results)
 wandb_logger.log_eval_result()
 wandb_logger.log_eval_samples(results["samples"])  # if log_samples
+print("small_model_id: " + small_model_id + " main_model_id: " + main_model_id + " compression_ratio: " + str(compression_ratio) + "tasks: Global MMLU")

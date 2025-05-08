@@ -142,18 +142,19 @@ class GemmaPrunedModel(nn.Module):
         self.main_model.requires_grad_(False)
 
     # — helper that runs the pruner —
-    def _prune(self, input_ids, attention_mask=None):
-        pruned_ids, _ = self.token_pruner(input_ids.to(self.device), attention_mask)
-        return pruned_ids
-
-    # — inference interfaces mimicking your original class —
+    def post_tokenizer(self, input_ids,atention_mask=None):
+        pruned_tokens_ids,_ = self.token_pruner(input_ids.to("cuda:0"),atention_mask)
+        pruned_tokens = self.prunner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False)
+        return pruned_tokens
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
-        pruned = self._prune(input_ids, attention_mask)
-        return self.main_model(input_ids=pruned, **kwargs)
-
+        if self.compression_ratio == 1.0:
+            return self.main_model.forward(input_ids,attention_mask=attention_mask, **kwargs)
+        pruned_tokens = self.post_tokenizer(input_ids, attention_mask)
+        output = self.main_model.forward(**self.main_tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
+        return output
     def generate(self, input_ids=None, attention_mask=None, **kwargs):
-        pruned = self._prune(input_ids, attention_mask)
-        return self.main_model.generate(input_ids=pruned, **kwargs)
-
-
-
+        if self.compression_ratio == 1.0:
+            return self.main_model.forward(input_ids,attention_mask=attention_mask, **kwargs)
+        pruned_tokens= self.post_tokenizer(input_ids, attention_mask)
+        output = self.main_model.generate(**self.main_tokenizer(pruned_tokens,return_tensors="pt").to(self.device), **kwargs)
+        return output
