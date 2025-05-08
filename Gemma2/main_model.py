@@ -140,6 +140,7 @@ class GemmaPrunedModel(nn.Module):
 
         # freeze generator weights
         self.main_model.requires_grad_(False)
+        self.compression_ratio = compression_ratio
 
     # — helper that runs the pruner —
     def post_tokenizer(self, input_ids,atention_mask=None):
