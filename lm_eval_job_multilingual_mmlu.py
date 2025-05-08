@@ -1,6 +1,6 @@
 import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 import lm_eval
 from lm_eval.utils import setup_logging
 from lm_eval.loggers import WandbLogger
@@ -70,7 +70,7 @@ results = lm_eval.simple_evaluate(  # call simple_evaluate
     # batch_size=16,
     task_manager=task_manager,
     apply_chat_template=True,
-    fewshot_as_multiturn=True,
+    # fewshot_as_multiturn=True,
 )
 
 wandb_logger = WandbLogger()

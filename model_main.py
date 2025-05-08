@@ -179,7 +179,7 @@ class LlamaPrunedModel(nn.Module):
         self.embeddings.requires_grad = False
     def post_tokenizer(self, input_ids,atention_mask=None):
         pruned_tokens_ids,_ = self.token_pruner(input_ids.to("cuda:0"),atention_mask)
-        pruned_tokens = self.prunner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False)
+        pruned_tokens = self.pruner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False)
         return pruned_tokens
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         if self.compression_ratio == 1.0:
