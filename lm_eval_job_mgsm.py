@@ -34,7 +34,7 @@ main_model_id = args.main_model
 compression_ratio = args.compression_ratio
 
 tokenizer = AutoTokenizer.from_pretrained(main_model_id)
-if "Gemma" in main_model_id:
+if "gemma" in main_model_id:
     model = GemmaPrunedModel(main_model_id, small_model_id, compression_ratio)
 else:
     model = LlamaPrunedModel(main_model_id, small_model_id, compression_ratio,token=token)
