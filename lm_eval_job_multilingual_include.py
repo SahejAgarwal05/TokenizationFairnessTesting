@@ -77,7 +77,7 @@ results = lm_eval.simple_evaluate(  # call simple_evaluate
         "include_base_44_malay",
         "include_base_44_malayalam",
         "include_base_44_nepali",
-        "include_base_44_north_macedonian",
+        "include_base_44_north macedonian",
         "include_base_44_persian",
         "include_base_44_polish",
         "include_base_44_portuguese",
