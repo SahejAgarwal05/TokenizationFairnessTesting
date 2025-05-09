@@ -173,7 +173,6 @@ class GemmaPrunedModel(nn.Module):
     def generate(self, input_ids=None, attention_mask=None, **kwargs):
         if self.compression_ratio == 1.0:
             return self.main_model.generate(input_ids, attention_mask=attention_mask, **kwargs)
-
         pruned_text = self._prune_and_detok(input_ids, attention_mask)
         model_inputs = self.main_tokenizer(pruned_text, return_tensors="pt",add_special_tokens=False).to(self.device)
         return self.main_model.generate(**model_inputs, **kwargs)

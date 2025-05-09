@@ -185,7 +185,7 @@ class LlamaPrunedModel(nn.Module):
         return output
     def generate(self, input_ids=None, attention_mask=None, **kwargs):
         if self.compression_ratio == 1.0:
-            return self.main_model.forward(input_ids,attention_mask=attention_mask, **kwargs)
+            return self.main_model.generate(input_ids,attention_mask=attention_mask, **kwargs)
         pruned_tokens= self.post_tokenizer(input_ids, attention_mask)
         output = self.main_model.generate(**self.main_tokenizer(pruned_tokens,return_tensors="pt",add_special_tokens=False).to(self.device), **kwargs)
         return output
