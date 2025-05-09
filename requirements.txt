@@ -5,3 +5,5 @@ simplejson==3.20.1
 torch==2.5.1
 tqdm==4.67.1
 transformers==4.50.0
+bitsandbytes==0.42.0
+wandb==0.15.3

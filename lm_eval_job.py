@@ -3,10 +3,9 @@ import lm_eval
 from lm_eval.utils import setup_logging
 from lm_eval.loggers import WandbLogger
 from transformers import AutoTokenizer
-from LLama3.model_main import LlamaPrunedModel
+from model.base_main import PrunedModel
 from lm_eval.tasks import TaskManager
 from lm_eval.models.huggingface import HFLM
-from Gemma2.main_model import GemmaPrunedModel
 import argparse
 import task_configs
 parser = argparse.ArgumentParser()
@@ -52,10 +51,7 @@ elif args.task == "arc":
     tasks = task_configs.arc
 tokenizer = AutoTokenizer.from_pretrained(main_model_id)
 
-if "gemma" in main_model_id:
-    model = GemmaPrunedModel(main_model_id, small_model_id, compression_ratio)
-else:
-    model = LlamaPrunedModel(main_model_id, small_model_id, compression_ratio,token=token)
+model = PrunedModel(main_model_id, small_model_id, compression_ratio)
 # initialize logging
 task_manager = TaskManager()
 setup_logging("DEBUG")  # optional, but recommended; or you can set up logging yourself

@@ -1,15 +1,9 @@
-# ────────────────────────────────────────────────────────────
-# Gemma-pruning pipeline
-#   – minimal, self-contained, no dropout –
-# ────────────────────────────────────────────────────────────
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import (
     AutoModelForCausalLM,
-    AutoTokenizer,
     BitsAndBytesConfig,
-    AutoConfig
 )
 
 HF_TOKEN        = "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"
@@ -88,8 +82,14 @@ class TokenPruner(nn.Module):
         )
         self.embeddings        = small.get_input_embeddings()
         # self.rotary_embeddings = small.model.rotary_emb
-        self.rotary_embeddings = small.model.layers[0].self_attn.rotary_emb
-        self.self_attention    = GemmaAttentionWeightsOnly(small.model.layers[0].self_attn)
+
+        # Looks like the Gemma model has two different rotary embeddings due to different versions
+        # Maybe it's a difference between Gmma-2 and Gemma-3 but transformers use the same GemmaModel for 2 and 3
+        try:
+            self.rotary_embeddings = small.model.layers[0].self_attn.rotary_emb  # transfomers v4.4x
+        except Exception as e:
+            self.rotary_embeddings = small.model.rotary_emb # transformers v4.5x after Gemma-3 release
+        self.self_attention = GemmaAttentionWeightsOnly(small.model.layers[0].self_attn)
         del small
 
         self.compression_ratio = compression_ratio
@@ -126,53 +126,3 @@ class TokenPruner(nn.Module):
 
         pruned_ids = torch.gather(input_ids, 1, topk)
         return pruned_ids, topk
-
-
-# ────────────────────────────────────────────────────────────
-# 3.  Main model wrapper (identical API to your Llama version)
-# ────────────────────────────────────────────────────────────
-class GemmaPrunedModel(nn.Module):
-    def __init__(self, main_id, small_id, compression_ratio):
-        super().__init__()
-        self.main_model = AutoModelForCausalLM.from_pretrained(
-            main_id,
-            token=HF_TOKEN,
-            torch_dtype=torch.bfloat16,
-            device_map="auto",
-            # quantization_config=bnb_config,   # <-- enable if desired
-            trust_remote_code=True,
-        )
-        self.main_tokenizer   = AutoTokenizer.from_pretrained(main_id,  token=HF_TOKEN,
-                                                              trust_remote_code=True)
-        self.pruner_tokenizer = AutoTokenizer.from_pretrained(small_id, token=HF_TOKEN,
-                                                              trust_remote_code=True)
-
-        self.token_pruner = TokenPruner(small_id, compression_ratio)
-        self.compression_ratio = compression_ratio
-        self.device = self.main_model.device
-        self.main_model.requires_grad_(False)                 # generator frozen
-        self.config = AutoConfig.from_pretrained(main_id)
-        self.tie_weights = lambda: self
-
-    # helper: run the pruner, then detokenize on the *pruner* vocab
-    def _prune_and_detok(self, input_ids, attention_mask=None):
-        pruned_tokens_ids, _ = self.token_pruner(input_ids.to(next(self.token_pruner.parameters()).device),
-                                          attention_mask)
-        pruned_tokens_ids = pruned_tokens_ids.tolist()
-        bos_id = self.pruner_tokenizer.bos_token_id
-        return self.pruner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False)
-
-    def forward(self, input_ids=None, attention_mask=None, **kwargs):
-        if self.compression_ratio == 1.0:
-            return self.main_model(input_ids, attention_mask=attention_mask, **kwargs)
-
-        pruned_text = self._prune_and_detok(input_ids, attention_mask)
-        model_inputs = self.main_tokenizer(pruned_text, return_tensors="pt",add_special_tokens=False).to(self.device)
-        return self.main_model(**model_inputs, **kwargs)
-
-    def generate(self, input_ids=None, attention_mask=None, **kwargs):
-        if self.compression_ratio == 1.0:
-            return self.main_model.generate(input_ids, attention_mask=attention_mask, **kwargs)
-        pruned_text = self._prune_and_detok(input_ids, attention_mask)
-        model_inputs = self.main_tokenizer(pruned_text, return_tensors="pt",add_special_tokens=False).to(self.device)
-        return self.main_model.generate(**model_inputs, **kwargs)

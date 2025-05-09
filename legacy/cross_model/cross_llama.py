@@ -7,7 +7,7 @@ from transformers import (
     AutoConfig,
     BitsAndBytesConfig,
 )
-from TokeniserMap import TokenizerMap
+from model.TokeniserMap import TokenizerMap
 HF_TOKEN = "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"
 SMALL_MODEL_ID = "meta-llama/Llama-3.2-1B-Instruct"   # pruner
 MAIN_MODEL_ID  = "CohereLabs/aya-expanse-8b"   # generator
