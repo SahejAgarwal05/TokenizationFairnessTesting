@@ -94,7 +94,7 @@ class PrunedModel(nn.Module):
             param.requires_grad = False
         self.embeddings.requires_grad = False
 
-    def post_tokenizer(self, input_ids):
+    def post_tokenizer(self, input_ids,attention_mask=None):
         if self.across_family_flag:
             org_tokens = self.main_tokenizer.batch_decode(
                 input_ids, skip_special_tokens=False
@@ -117,7 +117,7 @@ class PrunedModel(nn.Module):
             return self.main_model.forward(
                 input_ids, attention_mask=attention_mask, **kwargs
             )
-        pruned_tokens = self.post_tokenizer(input_ids)
+        pruned_tokens = self.post_tokenizer(input_ids,attention_mask)
         output = self.main_model.forward(
             **self.main_tokenizer(
                 pruned_tokens, return_tensors="pt", add_special_tokens=False
@@ -131,7 +131,7 @@ class PrunedModel(nn.Module):
             return self.main_model.generate(
                 input_ids, attention_mask=attention_mask, **kwargs
             )
-        pruned_tokens = self.post_tokenizer(input_ids)
+        pruned_tokens = self.post_tokenizer(input_ids,attention_mask)
         output = self.main_model.generate(
             **self.main_tokenizer(
                 pruned_tokens, return_tensors="pt", add_special_tokens=False
