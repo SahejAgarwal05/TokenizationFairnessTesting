@@ -82,12 +82,12 @@ class TokenPruner(nn.Module):
             model_id,
             token=HF_TOKEN,
             torch_dtype=torch.bfloat16,
-            device_map={"": device},
+            device_map="auto",
             trust_remote_code=True,
         )
         self.embeddings        = small.get_input_embeddings()
         # self.rotary_embeddings = small.model.rotary_emb
-        self.rotary_embeddings = small.layers[0].self_attn.rotary_emb
+        self.rotary_embeddings = small.model.layers[0].self_attn.rotary_emb
         self.self_attention    = GemmaAttentionWeightsOnly(small.model.layers[0].self_attn)
         del small
 
