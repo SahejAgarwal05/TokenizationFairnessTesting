@@ -51,7 +51,7 @@ elif args.task == "arc":
     tasks = task_configs.arc
 tokenizer = AutoTokenizer.from_pretrained(main_model_id)
 
-model = PrunedModel(main_model_id, small_model_id, compression_ratio)
+model = PrunedModel(main_model_id, small_model_id, compression_ratio,token=token)
 # initialize logging
 task_manager = TaskManager()
 setup_logging("DEBUG")  # optional, but recommended; or you can set up logging yourself
