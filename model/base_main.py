@@ -96,12 +96,12 @@ class PrunedModel(nn.Module):
 
     def post_tokenizer(self, input_ids):
         if self.across_family_flag:
-            org_tokens = self.pruner_tokenizer.batch_decode(
+            org_tokens = self.main_tokenizer.batch_decode(
                 input_ids, skip_special_tokens=False
             )
-            org_tokens = [self.across_family_forward_fn(o_t) for o_t in org_tokens]
+            new_tokens = [self.across_family_forward_fn(o_t) for o_t in org_tokens]
             new_inputs = self.pruner_tokenizer(
-                org_tokens, return_tensors="pt", add_special_tokens=False
+                new_tokens, return_tensors="pt", add_special_tokens=False
             )
             input_ids = new_inputs["input_ids"]
             attention_mask = new_inputs["attention_mask"]
