@@ -9,6 +9,7 @@ from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
     BitsAndBytesConfig,
+    AutoConfig
 )
 
 HF_TOKEN        = "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"
@@ -150,6 +151,8 @@ class GemmaPrunedModel(nn.Module):
         self.compression_ratio = compression_ratio
         self.device = self.main_model.device
         self.main_model.requires_grad_(False)                 # generator frozen
+        self.config = AutoConfig.from_pretrained(main_id)
+        self.tie_weights = lambda: self
 
     # helper: run the pruner, then detokenize on the *pruner* vocab
     def _prune_and_detok(self, input_ids, attention_mask=None):
