@@ -22,8 +22,6 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_quant_type="nf4",
     bnb_4bit_compute_dtype=torch.bfloat16,
 )
-
-
 # ────────────────────────────────────────────────────────────
 # 1.  “Weights-only” attention for Gemma
 # ────────────────────────────────────────────────────────────
@@ -67,7 +65,7 @@ class GemmaAttentionWeightsOnly(nn.Module):
         q, k = self._rope(q, k, rotary[0], rotary[1])
 
         k = k.repeat_interleave(self.expand, dim=1)               # expand KV heads → Q heads
-        scores = (q @ k.transpose(-1, -2)) 
+        scores = (q @ k.transpose(-1, -2))
 
         scores = scores #+ attn_mask.to(scores.dtype)              # causal masking
 
@@ -88,7 +86,8 @@ class TokenPruner(nn.Module):
             trust_remote_code=True,
         )
         self.embeddings        = small.get_input_embeddings()
-        self.rotary_embeddings = small.model.rotary_emb
+        # self.rotary_embeddings = small.model.rotary_emb
+        self.rotary_embeddings = small.layers[0].self_attn.rotary_emb
         self.self_attention    = GemmaAttentionWeightsOnly(small.model.layers[0].self_attn)
         del small
 
@@ -158,14 +157,14 @@ class GemmaPrunedModel(nn.Module):
                                           attention_mask)
         pruned_tokens_ids = pruned_tokens_ids.tolist()
         bos_id = self.pruner_tokenizer.bos_token_id
-        return self.pruner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False, add_special_tokens=False)
+        return self.pruner_tokenizer.batch_decode(pruned_tokens_ids, skip_special_tokens=False)
 
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         if self.compression_ratio == 1.0:
             return self.main_model(input_ids, attention_mask=attention_mask, **kwargs)
 
         pruned_text = self._prune_and_detok(input_ids, attention_mask)
-        model_inputs = self.main_tokenizer(pruned_text, return_tensors="pt").to(self.device)
+        model_inputs = self.main_tokenizer(pruned_text, return_tensors="pt",add_special_tokens=False).to(self.device)
         return self.main_model(**model_inputs, **kwargs)
 
     def generate(self, input_ids=None, attention_mask=None, **kwargs):
@@ -173,5 +172,5 @@ class GemmaPrunedModel(nn.Module):
             return self.main_model.generate(input_ids, attention_mask=attention_mask, **kwargs)
 
         pruned_text = self._prune_and_detok(input_ids, attention_mask)
-        model_inputs = self.main_tokenizer(pruned_text, return_tensors="pt").to(self.device)
+        model_inputs = self.main_tokenizer(pruned_text, return_tensors="pt",add_special_tokens=False).to(self.device)
         return self.main_model.generate(**model_inputs, **kwargs)

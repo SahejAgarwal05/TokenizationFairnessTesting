@@ -113,11 +113,7 @@ class TokenPruner(nn.Module):
             embeddings, rotary_embeds, attn_mask=attention_mask
         )
 
-        # Average over heads and query dimension => token importance
-        #################################DIFF###########################################
-        # importance_scores = attention_weights.mean(dim=1).mean(dim=1) # [1, seq_len]
         importance_scores = attention_weights.mean(dim=1).mean(dim=1) # [seq_len]
-        #################################DIFF###########################################
 
         # Number of tokens to keep
         compressed_length = int(seq_len * self.compression_ratio)
