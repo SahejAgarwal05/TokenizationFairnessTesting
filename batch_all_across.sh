@@ -1,0 +1,12 @@
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=1.0 --task=global_mmlu_lite
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.9 --task=global_mmlu_lite
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.8 --task=global_mmlu_lite
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.7 --task=global_mmlu_lite
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=1.0 --task=mgsm
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.9 --task=mgsm
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.8 --task=mgsm
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.7 --task=mgsm
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=1.0 --task=arc
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.9 --task=arc
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.8 --task=arc
+~/miniconda3/bin/python lm_eval_job.py --small_model=google/gemma-2-2b-it --main_model=CohereLabs/aya-expanse-8b --compression_ratio=0.7 --task=arc
