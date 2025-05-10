@@ -69,4 +69,4 @@ wandb_logger = WandbLogger()
 wandb_logger.post_init(results)
 wandb_logger.log_eval_result()
 wandb_logger.log_eval_samples(results["samples"])  # if log_samples
-print("small_model_id: " + small_model_id + " main_model_id: " + main_model_id + " compression_ratio: " + str(compression_ratio) + "tasks: Global MMLU")
+print("small_model_id: " + small_model_id + " main_model_id: " + main_model_id + " compression_ratio: " + str(compression_ratio) + "tasks: " + args.task)

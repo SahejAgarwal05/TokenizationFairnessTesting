@@ -109,7 +109,8 @@ class PrunedModel(nn.Module):
         pruned_tokens = self.pruner_tokenizer.batch_decode(
             pruned_tokens_ids, skip_special_tokens=False
         )
-        pruned_tokens = self.across_family_backforward_fn(pruned_tokens)
+        if self.across_family_flag:
+            pruned_tokens = self.across_family_backforward_fn(pruned_tokens)
         return pruned_tokens
 
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
