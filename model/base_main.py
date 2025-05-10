@@ -57,13 +57,13 @@ class PrunedModel(nn.Module):
                 small_model_id, compression_ratio, device="cuda:0"
             )
             if "llama" in main_model_id:
-                self.across_family_backforward_fn = lambda x: convert_gemma2_to_llama3(
+                self.across_family_backward_fn = lambda x: convert_gemma2_to_llama3(
                     x
                 )
                 self.across_family_forward_fn = lambda x: convert_llama3_to_gemma2(x)
                 self.across_family_flag = True
             if "aya_expanse" in main_model_id:
-                self.across_family_backforward_fn = (
+                self.across_family_backward_fn = (
                     lambda x: convert_gemma2_to_aya_expanse(x)
                 )
                 self.across_family_forward_fn = lambda x: convert_aya_expanse_to_gemma2(
@@ -75,13 +75,13 @@ class PrunedModel(nn.Module):
                 small_model_id, compression_ratio, device="cuda:0"
             )
             if "gemma" in main_model_id:
-                self.across_family_backforward_fn = lambda x: convert_llama3_to_gemma2(
+                self.across_family_backward_fn = lambda x: convert_llama3_to_gemma2(
                     x
                 )
                 self.across_family_forward_fn = lambda x: convert_gemma2_to_llama3(x)
                 self.across_family_flag = True
             if "aya_expanse" in main_model_id:
-                self.across_family_backforward_fn = (
+                self.across_family_backward_fn = (
                     lambda x: convert_llama3_to_aya_expanse(x)
                 )
                 self.across_family_forward_fn = lambda x: convert_aya_expanse_to_llama3(
@@ -105,7 +105,7 @@ class PrunedModel(nn.Module):
             )
             input_ids = new_inputs["input_ids"]
             attention_mask = new_inputs["attention_mask"]
-        pruned_tokens_ids, _ = self.token_pruner(input_ids.to("cuda:0"), attention_mask)
+        pruned_tokens_ids, _ = self.token_pruner(input_ids.to("cuda:0"), attention_mask.to("cuda:0"))
         pruned_tokens = self.pruner_tokenizer.batch_decode(
             pruned_tokens_ids, skip_special_tokens=False
         )

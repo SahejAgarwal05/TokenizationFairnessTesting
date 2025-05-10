@@ -77,9 +77,8 @@ class TokenPruner(nn.Module):
             model_id,
             token=HF_TOKEN,
             torch_dtype=torch.bfloat16,
-            device_map="auto",
             trust_remote_code=True,
-        )
+        ).to(device)
         self.embeddings        = small.get_input_embeddings()
         # self.rotary_embeddings = small.model.rotary_emb
 
