@@ -53,13 +53,13 @@ class PrunedModel(nn.Module):
         for param in self.main_model.parameters():
             param.requires_grad = False
         self.embeddings.requires_grad = False
-
-    def forward(self, input_ids=None, attention_mask=None, **kwargs):
+    def prune(self, input_ids=None, attention_mask=None):
         if self.compression_ratio == 1.0:
-            return self.main_model.forward(
-                input_ids, attention_mask=attention_mask, **kwargs
-            )
-        pruned_tokens = self.post_tokenizer(input_ids,attention_mask)
+            return input_ids
+        pruned_tokens = self.post_tokenizer(input_ids=input_ids,attention_mask=attention_mask)
+        return pruned_tokens
+    def forward(self, input_ids=None, attention_mask=None, **kwargs):
+        pruned_tokens = self.prune(input_ids=input_ids,attention_mask=attention_mask)
         output = self.main_model.forward(
             **self.main_tokenizer(
                 pruned_tokens, return_tensors="pt", add_special_tokens=False
@@ -69,11 +69,7 @@ class PrunedModel(nn.Module):
         return output
 
     def generate(self, input_ids=None, attention_mask=None, **kwargs):
-        if self.compression_ratio == 1.0:
-            return self.main_model.generate(
-                input_ids, attention_mask=attention_mask, **kwargs
-            )
-        pruned_tokens = self.post_tokenizer(input_ids,attention_mask)
+        pruned_tokens = self.prune(input_ids=input_ids,attention_mask=attention_mask)
         output = self.main_model.generate(
             **self.main_tokenizer(
                 pruned_tokens, return_tensors="pt", add_special_tokens=False

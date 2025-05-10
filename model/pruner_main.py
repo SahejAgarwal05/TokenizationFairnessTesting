@@ -62,11 +62,14 @@ class Pruner:
                     x
                 )
                 self.across_family_flag = True
-    def __call__(self, input_ids,attention_mask=None):
+    def __call__(self, input_ids,attention_mask=None,input_text_list=False):
         if self.across_family_flag:
-            org_tokens = self.main_tokenizer.batch_decode(
-                input_ids, skip_special_tokens=False
-            )
+            if input_text_list:
+                org_tokens = input_ids
+            else:
+                org_tokens = self.main_tokenizer.batch_decode(
+                    input_ids, skip_special_tokens=False
+                )
             new_tokens = [self.across_family_forward_fn(o_t) for o_t in org_tokens]
             new_inputs = self.pruner_tokenizer(
                 new_tokens, return_tensors="pt", add_special_tokens=False
