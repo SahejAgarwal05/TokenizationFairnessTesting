@@ -62,7 +62,7 @@ class PrunedModel(nn.Module):
                 )
                 self.across_family_forward_fn = lambda x: convert_llama3_to_gemma2(x)
                 self.across_family_flag = True
-            if "aya_expanse" in main_model_id:
+            if "aya-expanse" in main_model_id:
                 self.across_family_backward_fn = (
                     lambda x: convert_gemma2_to_aya_expanse(x)
                 )
@@ -80,7 +80,7 @@ class PrunedModel(nn.Module):
                 )
                 self.across_family_forward_fn = lambda x: convert_gemma2_to_llama3(x)
                 self.across_family_flag = True
-            if "aya_expanse" in main_model_id:
+            if "aya-expanse" in main_model_id:
                 self.across_family_backward_fn = (
                     lambda x: convert_llama3_to_aya_expanse(x)
                 )
