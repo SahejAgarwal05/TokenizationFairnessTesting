@@ -14,7 +14,7 @@ class Pruner:
         self.main_model_id = main_model_id
         self.small_model_id = small_model_id
         self.device = device
-        self.pruner_tokenization = AutoTokenizer.from_pretrained(
+        self.pruner_tokenizer = AutoTokenizer.from_pretrained(
             small_model_id,
             trust_remote_code=True,
         )
