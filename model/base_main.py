@@ -110,7 +110,7 @@ class PrunedModel(nn.Module):
             pruned_tokens_ids, skip_special_tokens=False
         )
         if self.across_family_flag:
-            pruned_tokens = self.across_family_backforward_fn(pruned_tokens)
+            pruned_tokens = [self.across_family_backward_fn(p_t) for p_t in pruned_tokens]
         return pruned_tokens
 
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
