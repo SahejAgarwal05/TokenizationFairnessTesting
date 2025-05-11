@@ -76,7 +76,7 @@ class Pruner:
             )
             input_ids = new_inputs["input_ids"]
             attention_mask = new_inputs["attention_mask"]
-        pruned_tokens_ids, _ = self.token_pruner(input_ids.to("cuda:0"), attention_mask.to("cuda:0"))
+        pruned_tokens_ids, _ = self.token_pruner(input_ids.to("cuda:0"), attention_mask)
         pruned_tokens = self.pruner_tokenizer.batch_decode(
             pruned_tokens_ids, skip_special_tokens=False
         )
