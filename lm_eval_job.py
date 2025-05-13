@@ -1,4 +1,5 @@
 import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import lm_eval
 from lm_eval.utils import setup_logging
 from lm_eval.loggers import WandbLogger
