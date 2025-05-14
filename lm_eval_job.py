@@ -35,6 +35,11 @@ parser.add_argument(
     default="global_mmlu_lite",
     type=str,
 )
+parser.add_argument(
+    "--quan",
+    default="false",
+    type=str,
+)
 args = parser.parse_args()
 
 token = "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"
@@ -52,7 +57,7 @@ elif args.task == "arc":
     tasks = task_configs.arc
 tokenizer = AutoTokenizer.from_pretrained(main_model_id)
 
-model = PrunedModel(main_model_id, small_model_id, compression_ratio,token=token)
+model = PrunedModel(main_model_id, small_model_id, compression_ratio,token=token,quan=args.quan)
 # initialize logging
 print("small_model_id: " + small_model_id + " main_model_id: " + main_model_id + " compression_ratio: " + str(compression_ratio) + "tasks: " + args.task)
 task_manager = TaskManager()

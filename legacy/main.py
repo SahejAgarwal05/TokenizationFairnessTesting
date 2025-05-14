@@ -1,5 +1,4 @@
 import os
-
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"#change when needed
 import torch
 import torch.nn as nn

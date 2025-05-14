@@ -14,16 +14,25 @@ bnb_config = BitsAndBytesConfig(
 
 
 class PrunedModel(nn.Module):
-    def __init__(self, main_model_id, small_model_id, compression_ratio, token):
+    def __init__(self, main_model_id, small_model_id, compression_ratio, token,quan):
         super().__init__()
-        self.main_model = AutoModelForCausalLM.from_pretrained(
-            main_model_id,
-            torch_dtype=torch.bfloat16,
-            device_map="auto",
-            trust_remote_code=True,
-            token=token,
-            # quantization_config=bnb_config
-        )
+        if quan == "true":
+            self.main_model = AutoModelForCausalLM.from_pretrained(
+                main_model_id,
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+                trust_remote_code=True,
+                token=token,
+                quantization_config=bnb_config
+            )
+        else:
+            self.main_model = AutoModelForCausalLM.from_pretrained(
+                main_model_id,
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+                trust_remote_code=True,
+                token=token,
+            )
         self.main_tokenizer = AutoTokenizer.from_pretrained(
             main_model_id,
             trust_remote_code=True,
