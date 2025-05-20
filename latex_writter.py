@@ -39,22 +39,24 @@ m_regx = "|".join(median_resource_languages)
 low_resource_languages = ["bn", "ta", "ne", "ml", "mr", "te", "kn"]
 l_regx = "|".join(low_resource_languages)
 
-# csv_file = "./results/global_mmlu_lite-llama3_8b-5_shot.csv"
+csv_file = "./results/arc-llama3_70b-5_shot.csv"
 
-# df = pd.read_csv(csv_file)
-import json
-json_obj = json.load(open("/tmp/global_mmlu_lite_gpt-4.1-nano_20250519_163945.json"))
-for k, v in json_obj.items():
-    json_obj[k] = [v]
-json_obj["compression_ratio"] = [1.0]
-df = pd.DataFrame.from_dict(json_obj)
+df = pd.read_csv(csv_file)
+# import json
+# json_obj = json.load(open("/tmp/global_mmlu_lite_gpt-4.1-nano_20250519_163945.json"))
+# for k, v in json_obj.items():
+#     json_obj[k] = [v]
+# json_obj["compression_ratio"] = [1.0]
+# df = pd.DataFrame.from_dict(json_obj)
 # Identify columns with /acc and /acc_stderr
-# h_acc_cols = [col for col in df.columns if re.match(".+(" + h_regx + ")/acc$", col)]
-# m_acc_cols = [col for col in df.columns if re.match(".+(" + m_regx + ")/acc$", col)]
-# l_acc_cols = [col for col in df.columns if re.match(".+(" + l_regx + ")/acc$", col)]
-h_acc_cols = [col for col in df.columns if re.match("(" + h_regx + ")$", col)]
-m_acc_cols = [col for col in df.columns if re.match("(" + m_regx + ")$", col)]
-l_acc_cols = [col for col in df.columns if re.match("(" + l_regx + ")$", col)]
+h_acc_cols = [col for col in df.columns if re.match(".+(" + h_regx + ")/acc$", col)]
+m_acc_cols = [col for col in df.columns if re.match(".+(" + m_regx + ")/acc$", col)]
+l_acc_cols = [col for col in df.columns if re.match(".+(" + l_regx + ")/acc$", col)]
+
+# h_acc_cols = [col for col in df.columns if re.match("(" + h_regx + ")$", col)]
+# m_acc_cols = [col for col in df.columns if re.match("(" + m_regx + ")$", col)]
+# l_acc_cols = [col for col in df.columns if re.match("(" + l_regx + ")$", col)]
+
 # h_acc_cols = [col for col in df.columns if re.match(".+(" + h_regx + ")", col)]
 # m_acc_cols = [col for col in df.columns if re.match(".+(" + m_regx + ")", col)]
 # l_acc_cols = [col for col in df.columns if re.match(".+(" + l_regx + ")", col)]
